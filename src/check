@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'json'
+
+input = JSON.parse(STDIN.gets)
+source = input["source"] || {}
+version = input["version"] || { "version" => "0.0" }
+
+major, minior = version["version"].split(".")
+
+uri = URI(source["uri"] + '/v1/versions')
+uri.query = URI.encode_www_form({major: major, minior: minior})
+
+res = Net::HTTP.get_response(uri)
+new_versions = JSON.parse(res.body)
+
+output = []
+
+new_versions.each do |v|
+  output << {"version" => v }
+end
+
+STDOUT.puts output.to_json

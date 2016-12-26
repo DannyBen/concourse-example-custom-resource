@@ -1,0 +1,27 @@
+resource_types:
+- name: game-db
+  type: docker-image
+  source:
+    repository: elct9620/concourse-example-custom-resource
+    tag: latest
+
+resources:
+- name: monster-db
+  type: game-db
+  source:
+    uri: http://192.168.100.52:3000
+
+jobs:
+- name: monster
+  plan:
+  - get: monster-db
+    trigger: true
+  - task: load
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: ubuntu}
+      run:
+        path: echo
+        args: ["Hey! Listen!"]
