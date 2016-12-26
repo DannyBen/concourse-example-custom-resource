@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'json'
+
+input = JSON.parse(STDIN.gets)
+source = input["source"] || {}
+version = input["version"] || {"version" => "0.0"}
+
+major, minior = version["version"].split(".")
+
+dest = ARGV[0]
+
+uri = URI(source["uri"] + '/v1/monsters')
+uri.query = URI.encode_www_form({major: major, minior: minior})
+
+res = Net::HTTP.get_response(uri)
+monsters = JSON.parse(res.body)
+
+output = []
+
+monsters.each do |monster|
+  output << monster.join(",")
+end
+
+monster_db_file = File.join(dest, "monsters.csv")
+
+File.write(monster_db_file, output.join("\n\r"))
+
+result = {
+  "version" => version,
+  "metadata" => [
+    {"name" => "count", "value" => monsters.size.to_s}
+  ]
+}
+
+STDOUT.puts result.to_json

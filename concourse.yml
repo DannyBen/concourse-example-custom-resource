@@ -22,6 +22,8 @@ jobs:
       image_resource:
         type: docker-image
         source: {repository: ubuntu}
+      inputs:
+        - name: monster-db
       run:
-        path: echo
-        args: ["Hey! Listen!"]
+        path: cat
+        args: ["monster-db/monsters.csv"]
