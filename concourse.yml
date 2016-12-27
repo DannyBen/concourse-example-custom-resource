@@ -9,7 +9,7 @@ resources:
 - name: monster-db
   type: game-db
   source:
-    uri: http://192.168.100.52:3000
+    uri: http://10.128.128.161:3000
 
 jobs:
 - name: monster
@@ -27,3 +27,6 @@ jobs:
       run:
         path: cat
         args: ["monster-db/monsters.csv"]
+  - put: monster-db
+    params:
+      version: 2.0
