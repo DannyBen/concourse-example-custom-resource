@@ -1,37 +1,19 @@
 #!/usr/bin/env ruby
+$LOAD_PATH.unshift File.expand_path(ENV['SOURCE_DIR'], __FILE__)
 
-require 'net/http'
-require 'json'
+require 'context'
+require 'api'
 
-input = JSON.parse(STDIN.gets)
-source = input["source"] || {}
-version = input["version"] || {"version" => "0.0"}
-
-major, minior = version["version"].split(".")
-
-dest = ARGV[0]
-
-uri = URI(source["uri"] + '/v1/monsters')
-uri.query = URI.encode_www_form({major: major, minior: minior})
-
-res = Net::HTTP.get_response(uri)
-monsters = JSON.parse(res.body)
-
-output = []
-
-monsters.each do |monster|
-  output << monster.join(",")
-end
-
-monster_db_file = File.join(dest, "monsters.csv")
-
-File.write(monster_db_file, output.join("\n\r"))
-
-result = {
-  "version" => version,
-  "metadata" => [
-    {"name" => "count", "value" => monsters.size.to_s}
-  ]
+context = Context.new
+output = {
+  "version" => { "version" => context.version },
+  "metadata" => []
 }
 
-STDOUT.puts result.to_json
+API.init(context)
+API.in do |monsters|
+  output["metadata"] << { "name" => "count", "value" => monsters.size.to_s }
+  context.write("monsters.csv", monsters.map { |m| m.join(",") }.join("\r\n"))
+end
+
+STDOUT.puts output.to_json

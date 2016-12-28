@@ -1,33 +1,18 @@
 #!/usr/bin/env ruby
+$LOAD_PATH.unshift File.expand_path(ENV['SOURCE_DIR'], __FILE__)
 
-require "net/http"
-require "json"
+require 'context'
+require 'api'
 
-input = JSON.parse(STDIN.gets)
-source = input["source"] || {}
-params = input["params"] || { "file": "build/monsters.csv" }
-version = "%.1f" % params["version"] || "0.0"
-
-major, minior = version.split(".")
-
-uri = URI(source["uri"])
-query = URI.encode_www_form({major: major, minior: minior})
-path = "/v1/version?" << query
-
-res = Net::HTTP.new(uri.host, uri.port).send_request("PUT", path)
-response = JSON.parse(res.body)
-
-updated_at = response["updated_at"] || false
-
-result = {
-  "version" => {"version": version },
+context = Context.new
+output = {
+  "version" => {"version" => context.version },
   "metadata" => []
 }
 
-if updated_at
-  result["metadata"] << { "name" => "updated_at", "value" => updated_at.to_s }
-else
-  result["metadata"]<< { "name" => "error", "value" => "No valid version matched!" }
+API.init(context)
+API.out do |updated_at|
+  output["metadata"] << { "name" => "updated_at", "value" => updated_at.strftime("%Y-%m-%d") }
 end
 
-STDOUT.puts result.to_json
+STDOUT.puts output.to_json

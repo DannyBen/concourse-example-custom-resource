@@ -1,24 +1,16 @@
 #!/usr/bin/env ruby
 
-require 'net/http'
-require 'json'
+$LOAD_PATH.unshift File.expand_path(ENV['SOURCE_DIR'], __FILE__)
 
-input = JSON.parse(STDIN.gets)
-source = input["source"] || {}
-version = input["version"] || { "version" => "0.0" }
+require 'context'
+require 'api'
 
-major, minior = version["version"].split(".")
-
-uri = URI(source["uri"] + '/v1/versions')
-uri.query = URI.encode_www_form({major: major, minior: minior})
-
-res = Net::HTTP.get_response(uri)
-new_versions = JSON.parse(res.body)
-
+context = Context.new
 output = []
 
-new_versions.each do |v|
-  output << {"version" => v }
+API.init(context)
+API.check do |versions|
+  output = versions.map { |version| { "version" => version } }
 end
 
 STDOUT.puts output.to_json

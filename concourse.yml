@@ -9,7 +9,7 @@ resources:
 - name: monster-db
   type: game-db
   source:
-    uri: http://10.128.128.161:3000
+    uri: http://192.168.2.102:3000
 
 jobs:
 - name: monster
