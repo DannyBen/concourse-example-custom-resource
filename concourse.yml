@@ -29,4 +29,4 @@ jobs:
         args: ["monster-db/monsters.csv"]
   - put: monster-db
     params:
-      version: 2.0
+      version: 2.1
